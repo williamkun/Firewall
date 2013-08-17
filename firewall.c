@@ -238,7 +238,6 @@ bool check_ip(unsigned int ip, unsigned int ip_rule, unsigned int mask)
     unsigned int tmp = ntohl(ip);
     int cmp_len = 32;
     int i = 0, j = 0;
-    //printk(KERN_INFO "compare ip %u <=> %u\n",tmp,ip_rule);
     if(mask != 0)
     {
         cmp_len = 0;
@@ -250,7 +249,7 @@ bool check_ip(unsigned int ip, unsigned int ip_rule, unsigned int mask)
                 break;
         }
     }
-    for(i = 31, j = 0; i < cmp_len; --i, ++j)
+    for(i = 31, j = 0; j < cmp_len; --i, ++j)
     {
         if((tmp & (1 << i)) != (ip_rule & (1 << i)))
         {
@@ -655,7 +654,6 @@ int procf_write(struct file *file, const char *buffer, unsigned long count, void
  */
 unsigned int hook_func_out(unsigned int hooknum, struct sk_buff *skb, const struct net_device *in, const struct net_device *out, int (*okfn)(struct sk_buff*))
 {
-    char temp[64];
     struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
     struct udphdr *udp_header;
     struct tcphdr *tcp_header;
@@ -725,27 +723,24 @@ unsigned int hook_func_out(unsigned int hooknum, struct sk_buff *skb, const stru
                     printk(KERN_INFO "hook_out: src is not match.\n");
                     continue;
                 }
+                else
+                    printk(KERN_INFO "src_ip match!!!\n");
             }            
-            //Change the way to comapre the ip
-            ip_hl_to_str(a_rule->dest_ip, temp);
-            if(strcmp(dest_ip_str, temp) == 0)
-                printk(KERN_INFO "dest is the same.\n");
-            else
-                printk(KERN_INFO "dest is not match.\n");
-            /*
             if(a_rule->dest_ip == 0)
             {
                 printk(KERN_INFO "hook_out: dest_ip is NULL\n");
             }
             else
             {
+                printk(KERN_INFO "dest_ip:%u\trule_dest_ip:%u",dest_ip, a_rule->dest_ip);
                 if(!check_ip(dest_ip, a_rule->dest_ip,a_rule->dest_netmask))
                 {
                     printk(KERN_INFO "hook_out: dest_ip is not match.\n");
                     continue;
                 }
+                else
+                    printk(KERN_INFO "dest_ip match!!!\n");
             }
-            */
             if(a_rule->src_port == 0)
             {
                 printk(KERN_INFO "hook_out: src_port is NULL\n");
@@ -757,11 +752,11 @@ unsigned int hook_func_out(unsigned int hooknum, struct sk_buff *skb, const stru
             }
             if(a_rule->dest_port == 0)
             {
-                printk(KERN_INFO "hook_out: dest_ip is NULL.\n");
+                printk(KERN_INFO "hook_out: dest_port is NULL.\n");
             }
             else if(dest_port != a_rule->dest_port)
             {
-                printk(KERN_INFO "hook_out: dest_ip is not match.\n");
+                printk(KERN_INFO "hook_out: dest_port is not match.\n");
                 continue;
             }
             //action:
